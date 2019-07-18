@@ -78,9 +78,15 @@ export default {
             if(!(/^[0-9A-Za-z]+$/.test(input))) return false
 
             switch (input.substring(0,3)) {
-                case "UPX":
-                    return input.length == 98
+            case "UPX":
+                return input.length == 98
 
+            case "UPi":
+                return input.length === 109
+
+            case "UmV":
+                return input.length === 97
+                
                 default:
                     return false
             }

@@ -12,30 +12,16 @@ export const address = (input) => {
 
     if(!(/^[0-9A-Za-z]+$/.test(input))) return false
 
-    switch (input.substring(0,4)) {
-        case "Sumo":
-        case "UPXL":
-        case "Suto":
-        case "UPXT":
-            return input.length === 99
+    switch (input.substring(0,3)) {
 
-        case "Subo":
-        case "Suso":
+        case "UPX":
             return input.length == 98
 
-        case "UPXS":
-        case "UPXU":
-            return input.length == 99
+        case "UPi":
+            return input.length === 109
 
-        case "Sumi":
-        case "UPXN":
-        case "Suti":
-        case "UPXE":
-            return input.length === 110
-
-        case "UPXK":
-        case "UPXH":
-            return input.length === 55
+        case "UmV":
+            return input.length === 97
 
         default:
             return false
