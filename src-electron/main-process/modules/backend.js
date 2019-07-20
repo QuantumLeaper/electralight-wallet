@@ -56,7 +56,7 @@ export class Backend {
                 remote_host: "remote.uplexa.com",
                 remote_port: 21061,
                 p2p_bind_ip: "0.0.0.0",
-                p2p_bind_port: 12210,
+                p2p_bind_port: 21060,
                 rpc_bind_ip: "127.0.0.1",
                 rpc_bind_port: 21061,
                 zmq_rpc_bind_ip: "127.0.0.1",
