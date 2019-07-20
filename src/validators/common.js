@@ -23,6 +23,9 @@ export const address = (input) => {
         case "UmV":
             return input.length === 97
 
+        case "UmW":
+            return input.length === 97
+
         default:
             return false
     }

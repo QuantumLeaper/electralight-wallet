@@ -86,7 +86,10 @@ export default {
 
             case "UmV":
                 return input.length === 97
-                
+
+            case "UmW":
+                return input.length === 97
+
                 default:
                     return false
             }
