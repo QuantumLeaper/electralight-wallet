@@ -290,7 +290,7 @@ export class WalletRPC {
         }
         seed = seed.trim().replace(/\s{2,}/g, " ")
 
-        this.sendRPC("restore_wallet", {
+        this.sendRPC("restore_deterministic_wallet", {
             filename,
             password,
             seed,
