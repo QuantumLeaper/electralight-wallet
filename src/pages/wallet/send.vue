@@ -41,12 +41,12 @@
                 <div class="col">
                     <q-field class="q-ma-none">
                         <q-input v-model="newTx.amount" float-label="Amount" :dark="theme=='dark'"
-                                 type="number" min="0" :max="unlocked_balance / 1e9" />
+                                 type="number" min="0" :max="unlocked_balance / 1e2" />
                     </q-field>
                 </div>
 
                 <div>
-                    <q-btn @click="newTx.amount = unlocked_balance / 1e9" :text-color="theme=='dark'?'white':'dark'">All coins</q-btn>
+                    <q-btn @click="newTx.amount = unlocked_balance / 1e2" :text-color="theme=='dark'?'white':'dark'">All coins</q-btn>
                 </div>
 
             </div>
@@ -258,7 +258,7 @@ export default {
                     message: "Amount must be greater than zero"
                 })
                 return
-            } else if(this.newTx.amount > this.unlocked_balance / 1e9) {
+            } else if(this.newTx.amount > this.unlocked_balance / 1e2) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
