@@ -154,7 +154,8 @@ export default {
                 amount: 0,
                 address: "",
                 payment_id: "",
-                mixin: 11,
+                mixin: 10,
+		ringsize: 11,
                 priority: 0,
                 address_book: {
                     save: false,
@@ -163,9 +164,9 @@ export default {
                 }
             },
             mixinOptions: [
-                {label: "11 mixins (default)", value: 11},
-                {label: "44 mixins (top secret)", value: 44},
-                {label: "88 mixins (paranoid)", value: 88},
+                {label: "10 mixins (default)", value: 10},
+                {label: "40 mixins (top secret)", value: 40},
+                {label: "80 mixins (paranoid)", value: 80},
             ],
             priorityOptions: [
                 {label: "Normal (x1 fee)", value: 0},

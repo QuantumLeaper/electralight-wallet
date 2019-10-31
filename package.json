@@ -1,6 +1,6 @@
 {
   "name": "uplexa-wallet-electralight",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "daemonVersion": "0.2.2.0",
   "description": "Modern GUI interface for uPlexa Currency",
   "productName": "uPlexa ElectraLight Wallet",
