@@ -1,6 +1,6 @@
 {
   "name": "uplexa-wallet-electralight",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "daemonVersion": "0.2.2.0",
   "description": "Modern GUI interface for uPlexa Currency",
   "productName": "uPlexa ElectraLight Wallet",
@@ -27,7 +27,7 @@
   "devDependencies": {
     "babel-eslint": "^8.2.1",
     "devtron": "^1.4.0",
-    "electron": "^2.0.0",
+    "electron": "^7.2.4",
     "electron-builder": "^20.28.4",
     "electron-debug": "^1.5.0",
     "electron-devtools-installer": "^2.2.4",

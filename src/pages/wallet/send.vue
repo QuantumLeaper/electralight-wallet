@@ -41,12 +41,12 @@
                 <div class="col">
                     <q-field class="q-ma-none">
                         <q-input v-model="newTx.amount" float-label="Amount" :dark="theme=='dark'"
-                                 type="number" min="0" :max="unlocked_balance / 1e9" />
+                                 type="number" min="0" :max="unlocked_balance / 1e2" />
                     </q-field>
                 </div>
 
                 <div>
-                    <q-btn @click="newTx.amount = unlocked_balance / 1e9" :text-color="theme=='dark'?'white':'dark'">All coins</q-btn>
+                    <q-btn @click="newTx.amount = unlocked_balance / 1e2" :text-color="theme=='dark'?'white':'dark'">All coins</q-btn>
                 </div>
 
             </div>
@@ -154,7 +154,8 @@ export default {
                 amount: 0,
                 address: "",
                 payment_id: "",
-                mixin: 11,
+                mixin: 10,
+		ringsize: 11,
                 priority: 0,
                 address_book: {
                     save: false,
@@ -163,9 +164,9 @@ export default {
                 }
             },
             mixinOptions: [
-                {label: "11 mixins (default)", value: 11},
-                {label: "44 mixins (top secret)", value: 44},
-                {label: "88 mixins (paranoid)", value: 88},
+                {label: "10 mixins (default)", value: 10},
+                {label: "40 mixins (top secret)", value: 40},
+                {label: "80 mixins (paranoid)", value: 80},
             ],
             priorityOptions: [
                 {label: "Normal (x1 fee)", value: 0},
@@ -258,7 +259,7 @@ export default {
                     message: "Amount must be greater than zero"
                 })
                 return
-            } else if(this.newTx.amount > this.unlocked_balance / 1e9) {
+            } else if(this.newTx.amount > this.unlocked_balance / 1e2) {
                 this.$q.notify({
                     type: "negative",
                     timeout: 1000,
