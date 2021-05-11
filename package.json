@@ -14,7 +14,7 @@
     "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "axios": "^0.18.1",
+    "axios": "^0.21.1",
     "bufferutil": "^4.0.3",
     "electron-window-state": "^5.0.2",
     "object-assign-deep": "^0.4.0",
