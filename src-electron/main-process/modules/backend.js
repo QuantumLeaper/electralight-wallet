@@ -1,9 +1,7 @@
 import { Daemon } from "./daemon";
 import { WalletRPC } from "./wallet-rpc";
-import { SCEE } from "./SCEE-Node";
-import { dialog } from "electron";
+import { ipcMain, dialog } from "electron";
 
-const WebSocket = require("ws");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
@@ -13,15 +11,12 @@ export class Backend {
         this.mainWindow = mainWindow
         this.daemon = null
         this.walletd = null
-        this.wss = null
-        this.token = null
         this.config_dir = null
         this.config_file = null
         this.config_data = {}
-        this.scee = new SCEE()
     }
 
-    init(config) {
+    init() {
 
         if(os.platform() == "win32") {
 	    this.config_dir = "C:\\ProgramData\\uplexa";
@@ -75,16 +70,11 @@ export class Backend {
             }
         }
 
-        this.token = config.token
-
-        this.wss = new WebSocket.Server({
-            port: config.port,
-            maxPayload: Number.POSITIVE_INFINITY
+        ipcMain.on("event", (event, data) => {
+            this.receive(data)
         })
 
-        this.wss.on("connection", ws => {
-            ws.on("message", data => this.receive(data));
-        });
+        this.startup()
 
     }
 
@@ -94,32 +84,23 @@ export class Backend {
             data
         }
 
-        let encrypted_data = this.scee.encryptString(JSON.stringify(message), this.token);
-
-        this.wss.clients.forEach(function each(client) {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(encrypted_data)
-            }
-        });
+        this.mainWindow.webContents.send("event", message)
     }
 
     receive(data) {
-
-        let decrypted_data = JSON.parse(this.scee.decryptString(data, this.token));
-
         // route incoming request to either the daemon, wallet, or here
-        switch (decrypted_data.module) {
+        switch (data.module) {
             case "core":
-                this.handle(decrypted_data);
+                this.handle(data);
                 break;
             case "daemon":
                 if (this.daemon) {
-                    this.daemon.handle(decrypted_data);
+                    this.daemon.handle(data);
                 }
                 break;
             case "wallet":
                 if (this.walletd) {
-                    this.walletd.handle(decrypted_data);
+                    this.walletd.handle(data);
                 }
                 break;
         }
@@ -172,9 +153,6 @@ export class Backend {
                     }
                 });
                 break;
-            case "init":
-                this.startup();
-                break;
 
             case "open_explorer":
                 if(params.type == "tx") {
@@ -209,6 +187,7 @@ export class Backend {
     }
 
     startup() {
+        this.send("initialize")
         fs.readFile(this.config_file, "utf8", (err,data) => {
             if (err) {
                 this.send("set_app_data", {
@@ -437,8 +416,6 @@ export class Backend {
                 process.push(this.daemon.quit())
             if(this.walletd)
                 process.push(this.walletd.quit())
-            if(this.wss)
-                this.wss.close();
 
             Promise.all(process).then(() => {
                 resolve()

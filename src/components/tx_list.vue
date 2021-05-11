@@ -8,7 +8,7 @@
     <template v-else>
         <q-infinite-scroll :handler="loadMore" ref="scroller">
             <q-list link no-border :dark="theme=='dark'" class="tx-list">
-                <q-item v-for="(tx, index) in tx_list_paged" :key="tx.txid"
+                <q-item v-for="(tx, index) in tx_list_paged" :key="`${tx.txid}-${tx.type}`"
                         @click.native="details(tx)" :class="'tx-'+tx.type">
                     <q-item-side>
                         <TxTypeIcon :type="tx.type" />

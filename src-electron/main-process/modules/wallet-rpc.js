@@ -26,8 +26,24 @@ export class WalletRPC {
 
         this.last_height_send_time = Date.now()
 
-        this.height_regex_1 = /Pulled blocks (\d+)-(\d+) \/ (\d+)/
-        this.height_regex_2 = /On new block (\d+) - (\w)/
+        this.height_regexes = [
+            {
+                string: /Processed block: <([a-f0-9]+)>, height (\d+)/,
+                height: (match) => match[2]
+            },
+            {
+                string: /Skipped block by height: (\d+)/,
+                height: (match) => match[1]
+            },
+            {
+                string: /Skipped block by timestamp, height: (\d+)/,
+                height: (match) => match[1]
+            },
+            {
+                string: /Blockchain sync progress: <([a-f0-9]+)>, height (\d+)/,
+                height: (match) => match[2]
+            }
+        ]
 
         this.agent = new http.Agent({keepAlive: true, maxSockets: 1})
         this.queue = new queue(1, Infinity)
@@ -100,7 +116,7 @@ export class WalletRPC {
                 this.walletRPCProcess.stdout.on("data", (data) => {
 
                     //process.stdout.write(`Wallet: ${data}`)
-
+/*
                     let lines = data.toString().split("\n");
                     let match, height = null
                     lines.forEach((line) => {
@@ -117,6 +133,27 @@ export class WalletRPC {
                         }
                     })
                     if(height && height > this.wallet_info.height && Date.now() - this.last_height_send_time > 1000) {
+                        this.last_height_send_time = Date.now()
+                        this.sendGateway("set_wallet_data", {
+                            info: {
+                                height
+                            }
+                        })
+                    }
+                }) */
+
+                    let lines = data.toString().split("\n")
+                    let match, height = null
+                    lines.forEach((line) => {
+                        for (const regex of this.height_regexes) {
+                            match = line.match(regex.string)
+                            if (match) {
+                                height = regex.height(match)
+                                break
+                            }
+                        }
+                    })
+                    if (height && Date.now() - this.last_height_send_time > 1000) {
                         this.last_height_send_time = Date.now()
                         this.sendGateway("set_wallet_data", {
                             info: {
@@ -538,9 +575,11 @@ export class WalletRPC {
 
     heartbeatAction(extended=false) {
         Promise.all([
+            this.sendRPC("get_address", { account_index: 0 }, 5000),
             this.sendRPC("getheight", {}, 5000),
             this.sendRPC("getbalance", {account_index: 0}, 5000)
         ]).then((data) => {
+            let didError = false
             let wallet = {
                 status: {
                     code: 0,
@@ -564,6 +603,11 @@ export class WalletRPC {
             for (let n of data) {
 
                 if(n.hasOwnProperty("error") || !n.hasOwnProperty("result")) {
+                  // Maybe we also need to look into the other error codes it could give us
+                  // Error -13: No wallet file - This occurs when you call open wallet while another wallet is still syncing
+                  if (extended && n.error && n.error.code === -13) {
+                      didError = true
+                  }
                     continue
                 }
 
@@ -572,6 +616,14 @@ export class WalletRPC {
                     this.sendGateway("set_wallet_data", {
                         info: {
                             height: n.result.height
+                        }
+                    })
+
+                } else if (n.method == "get_address") {
+                    wallet.info.address = n.result.address
+                    this.sendGateway("set_wallet_data", {
+                        info: {
+                            address: n.result.address
                         }
                     })
 
@@ -605,9 +657,20 @@ export class WalletRPC {
                     })
                 }
             }
+            // Set the wallet state on initial heartbeat
+            if (extended) {
+                if (!didError) {
+                    this.sendGateway("set_wallet_data", wallet)
+                } else {
+                    this.closeWallet().then(() => {
+                        this.sendGateway("set_wallet_error", { status: { code: -1, message: "Failed to open wallet. Please try again." } })
+                    })
+                }
+            }
         })
 
     }
+
 
     transfer (password, amount, address, payment_id, mixin, priority, address_book={}) {
 
@@ -1242,7 +1305,7 @@ export class WalletRPC {
         if(Object.keys(params).length !== 0) {
             options.json.params = params
         }
-        if(timeout) {
+        if(timeout > 0) {
             options.timeout = timeout
         }
 

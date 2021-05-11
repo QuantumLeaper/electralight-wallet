@@ -1,7 +1,6 @@
 import { app, ipcMain, BrowserWindow, Menu, dialog } from "electron"
 import { Backend } from "./modules/backend"
 import menuTemplate from "./menu"
-const portscanner = require("portscanner")
 const windowStateKeeper = require("electron-window-state")
 
 /**
@@ -18,22 +17,6 @@ if (process.env.PROD) {
 let mainWindow, backend
 let showConfirmClose = true
 let forceQuit = false
-
-const portInUse = function(port, callback) {
-    var server = net.createServer(function(socket) {
-        socket.write("Echo server\r\n");
-        socket.pipe(socket);
-    });
-
-    server.listen(port, "127.0.0.1");
-    server.on("error", function (e) {
-        callback(true);
-    });
-    server.on("listening", function (e) {
-        server.close();
-        callback(false);
-    });
-};
 
 function createWindow() {
     /**
@@ -59,7 +42,7 @@ function createWindow() {
       }
     })
 
-    mainWindow.webContents.openDevTools() // Add dev tools (Only for debug)
+    //mainWindow.webContents.openDevTools() // Add dev tools (Only for debug)
 
     mainWindow.on("close", (e) => {
         if (process.platform === "darwin") {
@@ -99,39 +82,8 @@ function createWindow() {
     })
 
     mainWindow.webContents.on("did-finish-load", () => {
-
-        require("crypto").randomBytes(64, (err, buffer) => {
-
-            // if err, then we may have to use insecure token generation perhaps
-            if (err) throw err;
-
-            let config = {
-                port: 21063,
-                token: buffer.toString("hex")
-            }
-
-            portscanner.checkPortStatus(config.port, "127.0.0.1", (error, status) => {
-                if (status == "closed") {
-                    backend = new Backend(mainWindow)
-                    backend.init(config)
-                    mainWindow.webContents.send("initialize", config)
-                } else {
-                    dialog.showMessageBox(mainWindow, {
-                        title: "Startup error",
-                        message: ` Wallet is already open, or port ${config.port} is in use`,
-                        type: "error",
-                        buttons: ["ok"]
-                    }, () => {
-                        showConfirmClose = false
-                        app.quit()
-                    })
-
-                }
-
-            })
-
-        })
-
+      backend = new Backend(mainWindow)
+      backend.init()
     })
 
     mainWindow.loadURL(process.env.APP_URL)
