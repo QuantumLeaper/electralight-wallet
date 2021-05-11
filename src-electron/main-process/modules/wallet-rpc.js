@@ -538,9 +538,11 @@ export class WalletRPC {
 
     heartbeatAction(extended=false) {
         Promise.all([
+            this.sendRPC("get_address", { account_index: 0 }, 5000),
             this.sendRPC("getheight", {}, 5000),
             this.sendRPC("getbalance", {account_index: 0}, 5000)
         ]).then((data) => {
+            let didError = false
             let wallet = {
                 status: {
                     code: 0,
@@ -564,6 +566,11 @@ export class WalletRPC {
             for (let n of data) {
 
                 if(n.hasOwnProperty("error") || !n.hasOwnProperty("result")) {
+                  // Maybe we also need to look into the other error codes it could give us
+                  // Error -13: No wallet file - This occurs when you call open wallet while another wallet is still syncing
+                  if (extended && n.error && n.error.code === -13) {
+                      didError = true
+                  }
                     continue
                 }
 
@@ -572,6 +579,14 @@ export class WalletRPC {
                     this.sendGateway("set_wallet_data", {
                         info: {
                             height: n.result.height
+                        }
+                    })
+
+                } else if (n.method == "get_address") {
+                    wallet.info.address = n.result.address
+                    this.sendGateway("set_wallet_data", {
+                        info: {
+                            address: n.result.address
                         }
                     })
 
@@ -605,9 +620,20 @@ export class WalletRPC {
                     })
                 }
             }
+            // Set the wallet state on initial heartbeat
+            if (extended) {
+                if (!didError) {
+                    this.sendGateway("set_wallet_data", wallet)
+                } else {
+                    this.closeWallet().then(() => {
+                        this.sendGateway("set_wallet_error", { status: { code: -1, message: "Failed to open wallet. Please try again." } })
+                    })
+                }
+            }
         })
 
     }
+
 
     transfer (password, amount, address, payment_id, mixin, priority, address_book={}) {
 
@@ -1242,7 +1268,7 @@ export class WalletRPC {
         if(Object.keys(params).length !== 0) {
             options.json.params = params
         }
-        if(timeout) {
+        if(timeout > 0) {
             options.timeout = timeout
         }
 
