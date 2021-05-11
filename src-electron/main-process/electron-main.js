@@ -52,8 +52,14 @@ function createWindow() {
         height: mainWindowState.height,
         minWidth: 640,
         minHeight: 480,
-        icon: require("path").join(__statics, "icon_512x512.png")
+        icon: require("path").join(__statics, "icon_512x512.png"),
+        webPreferences: {
+          nodeIntegration: true,
+          contextIsolation: false,
+      }
     })
+
+    mainWindow.webContents.openDevTools() // Add dev tools (Only for debug)
 
     mainWindow.on("close", (e) => {
         if (process.platform === "darwin") {

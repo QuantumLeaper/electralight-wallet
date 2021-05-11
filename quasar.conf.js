@@ -173,7 +173,7 @@ module.exports = function (ctx) {
                 // https://www.electron.build/configuration/configuration
 
                 appId: "com.uplexa.wallet",
-                productName: " Wallet ElectraLight",
+                productName: "Wallet ElectraLight",
                 copyright: "Copyright © 2018-2019 uPlexa Project",
 
                 // directories: {

@@ -322,6 +322,7 @@ export class Daemon {
                     continue
                 if(n.method == "get_info") {
                     daemon_info.info = n.result
+                    this.daemon_info = n.result
                 }
             }
             this.sendGateway("set_daemon_data", daemon_info)
