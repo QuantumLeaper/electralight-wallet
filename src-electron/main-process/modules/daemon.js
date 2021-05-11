@@ -85,6 +85,7 @@ export class Daemon {
                 "--limit-rate-up", options.daemon.limit_rate_up,
                 "--limit-rate-down", options.daemon.limit_rate_down,
                 "--log-level", options.daemon.log_level,
+                "--file-log-level", options.daemon.log_level,
             ];
 
             if(options.app.testnet) {
@@ -135,7 +136,8 @@ export class Daemon {
                             // Ignore
                         } else {
                             clearInterval(intrvl);
-                            reject(error);
+                            process.stdout.write(data);
+                            reject(data.error);
                         }
                     }
                 })

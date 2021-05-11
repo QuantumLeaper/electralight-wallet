@@ -26,9 +26,7 @@ export class WalletRPC {
 
         this.last_height_send_time = Date.now()
 
-        this.height_regex1 = /Processed block: <([a-f0-9]+)>, height (\d+)/
-        this.height_regex2 = /Skipped block by height: (\d+)/
-        this.height_regex3 = /Skipped block by timestamp, height: (\d+)/
+        this.height_regex = /Pulled blocks (\d+)-(\d+) \/ (\d+)/
 
         this.agent = new http.Agent({keepAlive: true, maxSockets: 1})
         this.queue = new queue(1, Infinity)
@@ -59,8 +57,9 @@ export class WalletRPC {
                     "--rpc-login", this.auth[0]+":"+this.auth[1],
                     "--rpc-bind-port", options.wallet.rpc_bind_port,
                     "--daemon-address", daemon_address,
-                    //"--log-level", options.wallet.log_level,
-                    "--log-level", "*:WARNING,net*:FATAL,net.http:DEBUG,global:INFO,verify:FATAL,stacktrace:INFO",
+                    //"--log-level", "*:WARNING,net*:FATAL,net.http:DEBUG,global:INFO,verify:FATAL,stacktrace:INFO",
+                    "--log-file-level", options.wallet.log_level,
+                    "--log-level", "3",
                 ]
 
                 let log_file
@@ -102,27 +101,17 @@ export class WalletRPC {
 
                 this.walletRPCProcess.stdout.on("data", (data) => {
 
-                    process.stdout.write(`Wallet: ${data}`)
+                    //process.stdout.write(`Wallet: ${data}`)
 
                     let lines = data.toString().split("\n");
                     let match, height = null
                     lines.forEach((line) => {
-                        match = line.match(this.height_regex1)
+                        match = line.match(this.height_regex)
                         if (match) {
                             height = match[2]
-                        } else {
-                            match = line.match(this.height_regex2)
-                            if (match) {
-                                height = match[1]
-                            } else {
-                                match = line.match(this.height_regex3)
-                                if (match) {
-                                    height = match[1]
-                                }
-                            }
                         }
                     })
-                    if(height && Date.now() - this.last_height_send_time > 1000) {
+                    if(this.wallet_info.height === 0 && height && Date.now() - this.last_height_send_time > 1000) {
                         this.last_height_send_time = Date.now()
                         this.sendGateway("set_wallet_data", {
                             info: {
@@ -1298,8 +1287,8 @@ export class WalletRPC {
                         this.agent.destroy()
                         resolve()
                     })
-                    this.walletRPCProcess.kill()
-                }, 2500)
+                    this.walletRPCProcess.kill(3)
+                }, 10000)
             } else {
                 resolve()
             }
