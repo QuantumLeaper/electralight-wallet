@@ -5,7 +5,7 @@
         <div class="row q-pt-sm q-mx-md q-mb-none items-center non-selectable" style="height: 44px;">
 
             <div class="col-8">
-                <q-icon name="call_made" size="24px" /> Send 
+                <q-icon name="call_made" size="24px" /> Send
             </div>
 
             <div class="col-4">
@@ -25,7 +25,7 @@
         <div class="row q-pt-sm q-mx-md q-mb-none items-center non-selectable" style="height: 44px;">
 
             <div class="col-8">
-                <q-icon name="call_made" size="24px" /> Send 
+                <q-icon name="call_made" size="24px" /> Send
             </div>
 
             <div class="col-4">
@@ -203,7 +203,7 @@ export default {
                             amount: 0,
                             address: "",
                             payment_id: "",
-                            mixin: 12,
+                            mixin: 10,
                             priority: 0,
                             address_book: {
                                 save: false,

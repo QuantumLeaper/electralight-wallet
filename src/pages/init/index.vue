@@ -193,13 +193,6 @@ export default {
                 case 4:
                     this.version = this.status.message
                     break;
-                case 5:
-                    this.$q.notify({
-                        type: "warning",
-                        timeout: 2000,
-                        message: "Warning: uplexad not found, using remote node"
-                    })
-                    break;
                 case 6:
                     this.message = "Starting wallet"
                     this.$refs.backend.className = "solid"
