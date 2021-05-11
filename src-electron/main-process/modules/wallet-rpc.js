@@ -26,8 +26,24 @@ export class WalletRPC {
 
         this.last_height_send_time = Date.now()
 
-        this.height_regex_1 = /Pulled blocks (\d+)-(\d+) \/ (\d+)/
-        this.height_regex_2 = /On new block (\d+) - (\w)/
+        this.height_regexes = [
+            {
+                string: /Processed block: <([a-f0-9]+)>, height (\d+)/,
+                height: (match) => match[2]
+            },
+            {
+                string: /Skipped block by height: (\d+)/,
+                height: (match) => match[1]
+            },
+            {
+                string: /Skipped block by timestamp, height: (\d+)/,
+                height: (match) => match[1]
+            },
+            {
+                string: /Blockchain sync progress: <([a-f0-9]+)>, height (\d+)/,
+                height: (match) => match[2]
+            }
+        ]
 
         this.agent = new http.Agent({keepAlive: true, maxSockets: 1})
         this.queue = new queue(1, Infinity)
@@ -100,7 +116,7 @@ export class WalletRPC {
                 this.walletRPCProcess.stdout.on("data", (data) => {
 
                     //process.stdout.write(`Wallet: ${data}`)
-
+/*
                     let lines = data.toString().split("\n");
                     let match, height = null
                     lines.forEach((line) => {
@@ -117,6 +133,27 @@ export class WalletRPC {
                         }
                     })
                     if(height && height > this.wallet_info.height && Date.now() - this.last_height_send_time > 1000) {
+                        this.last_height_send_time = Date.now()
+                        this.sendGateway("set_wallet_data", {
+                            info: {
+                                height
+                            }
+                        })
+                    }
+                }) */
+
+                    let lines = data.toString().split("\n")
+                    let match, height = null
+                    lines.forEach((line) => {
+                        for (const regex of this.height_regexes) {
+                            match = line.match(regex.string)
+                            if (match) {
+                                height = regex.height(match)
+                                break
+                            }
+                        }
+                    })
+                    if (height && Date.now() - this.last_height_send_time > 1000) {
                         this.last_height_send_time = Date.now()
                         this.sendGateway("set_wallet_data", {
                             info: {

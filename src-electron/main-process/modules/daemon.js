@@ -219,10 +219,10 @@ export class Daemon {
                 timestamp = Math.floor(timestamp / 1000)
             }
 
-            pivot = pivot || [137500, 1528073506]
+            pivot = pivot || [295550, 1572134400]
             recursion_limit = recursion_limit || 0;
 
-            let diff = Math.floor((timestamp - pivot[1]) / 240)
+            let diff = Math.floor((timestamp - pivot[1]) / 120)
             let estimated_height = pivot[0] + diff
 
             if(estimated_height <= 0) {
