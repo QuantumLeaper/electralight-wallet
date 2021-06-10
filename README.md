@@ -51,7 +51,7 @@ cd electralight-wallet
 cp /path/to/uplexa/binaries/uplexad bin/
 cp /path/to/uplexa/binaries/uplexa-wallet-rpc bin/
 npm install
-quasar build -m electron -t mat
+npm run build
 ```
 
 ---
